@@ -12,6 +12,7 @@ ChartJS.register(ArcElement, BarElement, LineElement, CategoryScale, LinearScale
 const TransactionList = ({ dateRange, limit = 10 }) => {
   const [transactions, setTransactions] = useState([]);
   const [allTransactions, setAllTransactions] = useState([]);
+  const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sortOrder, setSortOrder] = useState('normal');
@@ -22,8 +23,8 @@ const TransactionList = ({ dateRange, limit = 10 }) => {
   const [totalPages, setTotalPages] = useState(1);
   const [listedTotals, setListedTotals] = useState({ income: 0, expense: 0 });
   const [allTotals, setAllTotals] = useState({ income: 0, expense: 0 });
-  const [allChartType, setAllChartType] = useState('pie'); // Chart type for all transactions
-  const [filteredChartType, setFilteredChartType] = useState('pie'); // Chart type for filtered transactions
+  const [allChartType, setAllChartType] = useState('pie');
+  const [filteredChartType, setFilteredChartType] = useState('pie');
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -69,14 +70,6 @@ const TransactionList = ({ dateRange, limit = 10 }) => {
           }
           setTransactions(sortedTransactions);
           setTotalPages(response.data.totalPages);
-          setListedTotals({
-            income: sortedTransactions
-              .filter(t => t.type === 'Income')
-              .reduce((sum, t) => sum + t.amount, 0),
-            expense: sortedTransactions
-              .filter(t => t.type === 'Expense')
-              .reduce((sum, t) => sum + t.amount, 0)
-          });
           setError('');
         } else {
           setError('Invalid transactions data received');
@@ -87,7 +80,40 @@ const TransactionList = ({ dateRange, limit = 10 }) => {
         setTransactions([]);
       }
     };
+
+    const fetchFilteredTotalsAndChartData = async () => {
+      try {
+        const params = { page: 1, limit: Number.MAX_SAFE_INTEGER };
+        if (startDate) params.startDate = startDate;
+        if (endDate) params.endDate = endDate;
+        if (dateRange?.type) params.type = dateRange.type;
+        if (selectedCategory) params.category = selectedCategory;
+        const response = await axios.get('http://localhost:5000/api/v1/transactions', {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+          params
+        });
+        if (response.data && Array.isArray(response.data.transactions)) {
+          setFilteredTransactions(response.data.transactions);
+          setListedTotals({
+            income: response.data.transactions
+              .filter(t => t.type === 'Income')
+              .reduce((sum, t) => sum + t.amount, 0),
+            expense: response.data.transactions
+              .filter(t => t.type === 'Expense')
+              .reduce((sum, t) => sum + t.amount, 0)
+          });
+        } else {
+          setError('Invalid filtered transactions data received');
+          setFilteredTransactions([]);
+        }
+      } catch (error) {
+        setError('Error fetching filtered transactions: ' + error.message);
+        setFilteredTransactions([]);
+      }
+    };
+
     fetchTransactions();
+    fetchFilteredTotalsAndChartData();
   }, [startDate, endDate, dateRange?.type, selectedCategory, sortOrder, currentPage, limit]);
 
   useEffect(() => {
@@ -131,7 +157,7 @@ const TransactionList = ({ dateRange, limit = 10 }) => {
   };
 
   const prepareChartData = (type, useAllTransactions = false) => {
-    const dataSource = useAllTransactions ? allTransactions : transactions;
+    const dataSource = useAllTransactions ? allTransactions : filteredTransactions;
     const dataByCategory = categories.reduce((acc, category) => {
       const total = dataSource
         .filter(t => t.category === category && (!type || t.type === type))
@@ -173,9 +199,30 @@ const TransactionList = ({ dateRange, limit = 10 }) => {
     };
   };
 
-  const downloadPDF = (useAll = false) => {
+  const fetchAllFilteredTransactions = async () => {
+    try {
+      const params = { page: 1, limit: Number.MAX_SAFE_INTEGER };
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
+      if (dateRange?.type) params.type = dateRange.type;
+      if (selectedCategory) params.category = selectedCategory;
+      const response = await axios.get('http://localhost:5000/api/v1/transactions', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        params
+      });
+      if (response.data && Array.isArray(response.data.transactions)) {
+        return response.data.transactions;
+      }
+      return [];
+    } catch (error) {
+      setError('Error fetching filtered transactions for download: ' + error.message);
+      return [];
+    }
+  };
+
+  const downloadPDF = async (useAll = false) => {
     const doc = new jsPDF();
-    const dataSource = useAll ? allTransactions : transactions;
+    const dataSource = useAll ? allTransactions : await fetchAllFilteredTransactions();
     const totalIncome = dataSource
       .filter(t => t.type === 'Income')
       .reduce((sum, t) => sum + t.amount, 0);
@@ -206,8 +253,8 @@ const TransactionList = ({ dateRange, limit = 10 }) => {
     doc.save(`${useAll ? 'all_' : ''}${dateRange?.type || 'transactions'}.pdf`);
   };
 
-  const downloadCSV = (useAll = false) => {
-    const dataSource = useAll ? allTransactions : transactions;
+  const downloadCSV = async (useAll = false) => {
+    const dataSource = useAll ? allTransactions : await fetchAllFilteredTransactions();
     const csvData = dataSource.map(t => ({
       Date: new Date(t.date).toLocaleDateString(),
       Category: t.category,
@@ -224,8 +271,8 @@ const TransactionList = ({ dateRange, limit = 10 }) => {
     URL.revokeObjectURL(url);
   };
 
-  const downloadExcel = (useAll = false) => {
-    const dataSource = useAll ? allTransactions : transactions;
+  const downloadExcel = async (useAll = false) => {
+    const dataSource = useAll ? allTransactions : await fetchAllFilteredTransactions();
     const wsData = dataSource.map(t => [
       new Date(t.date).toLocaleDateString(),
       t.category,
@@ -277,17 +324,16 @@ const TransactionList = ({ dateRange, limit = 10 }) => {
           </div>
         )}
         <div className="mb-4">
-  <label className="block text-sm font-medium text-gray-300">Chart Type (All Transactions)</label>
-  <select
-    value={allChartType}
-    onChange={(e) => setAllChartType(e.target.value)}
-    className="mt-1 p-1 bg-gray-800 border border-gray-600 rounded-md text-white text-sm focus:ring-indigo-500 focus:border-indigo-500 max-w-xs"
-  >
-    <option value="pie">Pie Chart</option>
-    <option value="bar">Bar Graph</option>
-  </select>
-</div>
-        
+          <label className="block text-sm font-medium text-gray-300">Chart Type (All Transactions)</label>
+          <select
+            value={allChartType}
+            onChange={(e) => setAllChartType(e.target.value)}
+            className="mt-1 p-1 bg-gray-800 border border-gray-600 rounded-md text-white text-sm focus:ring-indigo-500 focus:border-indigo-500 max-w-xs"
+          >
+            <option value="pie">Pie Chart</option>
+            <option value="bar">Bar Graph</option>
+          </select>
+        </div>
         {dateRange?.type ? (
           <div className="max-w-lg mx-auto mb-4">
             <h3 className="text-lg font-semibold mb-2" style={{ color: dateRange?.type === 'Income' ? '#10B981' : '#EF4444' }}>
@@ -431,6 +477,39 @@ const TransactionList = ({ dateRange, limit = 10 }) => {
             Download Filtered (Excel)
           </button>
         </div>
+        <div className="mb-4">
+          {dateRange?.type === 'Income' ? (
+            <div className="bg-gray-700 p-4 rounded-lg">
+              <p className="text-green-500 font-medium">
+                Total Income: ₹{listedTotals.income.toFixed(2)}
+              </p>
+            </div>
+          ) : dateRange?.type === 'Expense' ? (
+            <div className="bg-gray-700 p-4 rounded-lg">
+              <p className="text-red-500 font-medium">
+                Total Expense: ₹{listedTotals.expense.toFixed(2)}
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-gray-700 p-4 rounded-lg">
+                <p className="text-green-500 font-medium">
+                  Total Income: ₹{listedTotals.income.toFixed(2)}
+                </p>
+              </div>
+              <div className="bg-gray-700 p-4 rounded-lg">
+                <p className="text-red-500 font-medium">
+                  Total Expense: ₹{listedTotals.expense.toFixed(2)}
+                </p>
+              </div>
+              <div className="bg-gray-700 p-4 rounded-lg">
+                <p className="text-white font-medium">
+                  Total Balance: ₹{(listedTotals.income - listedTotals.expense).toFixed(2)}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
         {transactions.length === 0 ? (
           <p className="text-gray-300 font-medium">No transactions found.</p>
         ) : (
@@ -459,41 +538,6 @@ const TransactionList = ({ dateRange, limit = 10 }) => {
                 </tbody>
               </table>
             </div>
-            {currentPage === totalPages && (
-              <div className="mt-4">
-                {dateRange?.type === 'Income' ? (
-                  <div className="bg-gray-700 p-4 rounded-lg">
-                    <p className="text-green-500 font-medium">
-                      Total Income: ₹{listedTotals.income.toFixed(2)}
-                    </p>
-                  </div>
-                ) : dateRange?.type === 'Expense' ? (
-                  <div className="bg-gray-700 p-4 rounded-lg">
-                    <p className="text-red-500 font-medium">
-                      Total Expense: ₹{listedTotals.expense.toFixed(2)}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="bg-gray-700 p-4 rounded-lg">
-                      <p className="text-green-500 font-medium">
-                        Total Income: ₹{listedTotals.income.toFixed(2)}
-                      </p>
-                    </div>
-                    <div className="bg-gray-700 p-4 rounded-lg">
-                      <p className="text-red-500 font-medium">
-                        Total Expense: ₹{listedTotals.expense.toFixed(2)}
-                      </p>
-                    </div>
-                    <div className="bg-gray-700 p-4 rounded-lg">
-                      <p className="text-white font-medium">
-                        Total Balance: ₹{(listedTotals.income - listedTotals.expense).toFixed(2)}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
             <div className="mt-4 flex justify-between items-center">
               <button
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
