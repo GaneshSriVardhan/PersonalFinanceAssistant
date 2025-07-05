@@ -64,8 +64,9 @@ exports.getUserInfo = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password -verificationToken');
     if (!user) return res.status(404).json({ error: 'User not found' });
-    res.json(user);
+    res.json({ ...user.toObject(), userId: user._id.toString() });
   } catch (err) {
+    console.error('Error in getUserInfo:', err);
     res.status(500).json({ error: err.message });
   }
 };
