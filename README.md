@@ -56,6 +56,7 @@ Secure user registration with email verification to ensure account authenticity.
   - Sort order (recent, high-to-low amount, low-to-high amount)
   - Dynamic user-defined categories
 - Reset filters button for easy navigation
+![image](https://github.com/user-attachments/assets/d4246a6c-2f57-48a7-97e1-f6303bad145b)
 ![image](https://github.com/user-attachments/assets/05733a0e-9d64-47f6-8e90-b195c76c4e8f)
 ![image](https://github.com/user-attachments/assets/f2d4c86a-eacb-476a-93c1-d6899386578b)
 
@@ -170,7 +171,8 @@ A **MONGODB** database is used. Key schemas:
     npm install
 4. **Configure Environment Variables**
 
-    ```.env (Backend):
+    ```
+    .env (Backend):
     DATABASE_URL=yourURL
     JWT_SECRET=your_jwt_secret
     CLIENT_URI=http://localhost:3000
@@ -178,11 +180,14 @@ A **MONGODB** database is used. Key schemas:
     EMAIL_PASS=your_email_password
     PORT=5000
     ```
-    ```.env (Frontend):
+    ```
+    .env (Frontend):
     REACT_APP_API_URL=http://localhost:5000
   5. **Run the Backend**
+     ```bash
      cd backend
      npm start
   6. **Run the Frontend**
+   ```bash
       cd frontend
       npm start
