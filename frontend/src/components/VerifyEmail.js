@@ -10,7 +10,7 @@ const VerifyEmail = () => {
   useEffect(() => {
     const verifyEmail = async () => {
       try {
-        const response = await axios.get(`REACT_APP_API_URL/api/v1/auth/verify-email?token=${token}`);
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/v1/auth/verify-email?token=${token}`);
         setMessage(response.data.message);
         setTimeout(() => (window.location.href = '/login'), 3000); 
       } catch (error) {
