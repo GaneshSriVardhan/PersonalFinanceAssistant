@@ -1,7 +1,7 @@
 // frontend/src/services/api.js
 import axios from 'axios';
 
-const API_URL = 'https://personal-finance-assistant-umber.vercel.app/api/v1';
+const API_URL = 'REACT_APP_API_URL/api/v1';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -54,7 +54,7 @@ export const getUser = async () => {
 export const createTransactionBatch = async (transactions) => {
   const token = localStorage.getItem('token');
   const response = await axios.post(
-    'https://personal-finance-assistant-umber.vercel.app/api/v1/transactions/batch',
+    'REACT_APP_API_URL/api/v1/transactions/batch',
     { transactions },
     {
       headers: {

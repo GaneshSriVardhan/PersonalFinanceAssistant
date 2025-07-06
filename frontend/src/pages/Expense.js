@@ -12,7 +12,7 @@ const Expense = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const userResponse = await axios.get('https://personal-finance-assistant-umber.vercel.app/api/v1/auth/getUser', {
+        const userResponse = await axios.get('REACT_APP_API_URL/api/v1/auth/getUser', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         setUser(userResponse.data);

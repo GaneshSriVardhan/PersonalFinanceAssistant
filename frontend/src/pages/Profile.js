@@ -11,7 +11,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await axios.get('https://personal-finance-assistant-umber.vercel.app/api/v1/auth/getUser', {
+        const response = await axios.get('REACT_APP_API_URL/api/v1/auth/getUser', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         setUser(response.data);
