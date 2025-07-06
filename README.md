@@ -19,12 +19,6 @@ Built with clean, modular code and robust error handling, it showcases modern so
 - [Tech Stack](#tech-stack)
 - [Data Model](#data-model)
 - [Installation](#installation)
-- [Usage](#usage)
-- [API Endpoints](#api-endpoints)
-- [Code Quality](#code-quality)
-- [Contributing](#contributing)
-- [License](#license)
-- [Contact](#contact)
 
 ---
 
