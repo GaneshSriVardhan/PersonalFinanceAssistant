@@ -470,7 +470,7 @@ const TransactionList = ({ dateRange, limit = 10 }) => {
       try {
         const params = {};
         if (dateRange?.type) params.type = dateRange.type;
-        const response = await axios.get('http://localhost:5000/api/v1/transactions/categories', {
+        const response = await axios.get('https://personal-finance-assistant-umber.vercel.app/api/v1/transactions/categories', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
           params
         });
@@ -494,7 +494,7 @@ const TransactionList = ({ dateRange, limit = 10 }) => {
         if (endDate) params.endDate = endDate;
         if (dateRange?.type) params.type = dateRange.type;
         if (selectedCategory) params.category = selectedCategory;
-        const response = await axios.get('http://localhost:5000/api/v1/transactions', {
+        const response = await axios.get('https://personal-finance-assistant-umber.vercel.app/api/v1/transactions', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
           params
         });
@@ -527,7 +527,7 @@ const TransactionList = ({ dateRange, limit = 10 }) => {
         if (endDate) params.endDate = endDate;
         if (dateRange?.type) params.type = dateRange.type;
         if (selectedCategory) params.category = selectedCategory;
-        const response = await axios.get('http://localhost:5000/api/v1/transactions', {
+        const response = await axios.get('https://personal-finance-assistant-umber.vercel.app/api/v1/transactions', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
           params
         });
@@ -560,7 +560,7 @@ const TransactionList = ({ dateRange, limit = 10 }) => {
       try {
         const params = {};
         if (dateRange?.type) params.type = dateRange.type;
-        const response = await axios.get('http://localhost:5000/api/v1/transactions', {
+        const response = await axios.get('https://personal-finance-assistant-umber.vercel.app/api/v1/transactions', {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
           params
         });
@@ -602,7 +602,7 @@ const TransactionList = ({ dateRange, limit = 10 }) => {
       if (endDate) params.endDate = endDate;
       if (dateRange?.type) params.type = dateRange.type;
       if (selectedCategory) params.category = selectedCategory;
-      const response = await axios.get('http://localhost:5000/api/v1/transactions', {
+      const response = await axios.get('https://personal-finance-assistant-umber.vercel.app/api/v1/transactions', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         params
       });

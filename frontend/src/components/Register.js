@@ -17,7 +17,7 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/v1/auth/register', formData);
+      await axios.post('https://personal-finance-assistant-umber.vercel.app/api/v1/auth/register', formData);
       setMessage('Registration successful! Please check your email to verify.');
       setError('');
       setFormData({ email: '', name: '', password: '' });

@@ -10,7 +10,7 @@ const VerifyEmail = () => {
   useEffect(() => {
     const verifyEmail = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/v1/auth/verify-email?token=${token}`);
+        const response = await axios.get(`https://personal-finance-assistant-umber.vercel.app/api/v1/auth/verify-email?token=${token}`);
         setMessage(response.data.message);
         setTimeout(() => (window.location.href = '/login'), 3000); 
       } catch (error) {

@@ -11,7 +11,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/v1/auth/login', formData);
+      const response = await axios.post('https://personal-finance-assistant-umber.vercel.app/api/v1/auth/login', formData);
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('userId', response.data.userId); // Store userId
       setError('');
