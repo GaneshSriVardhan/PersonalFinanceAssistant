@@ -54,7 +54,7 @@ export const getUser = async () => {
 export const createTransactionBatch = async (transactions) => {
   const token = localStorage.getItem('token');
   const response = await axios.post(
-    `${process.env.REACT_APP_API_URL}/api/v1/transactions/batch`,
+    '/transactions/batch',
     { transactions },
     {
       headers: {
