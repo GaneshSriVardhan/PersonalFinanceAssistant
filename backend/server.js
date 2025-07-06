@@ -10,9 +10,6 @@ dotenv.config();
 const app=express();
 app.use(
   cors({
-    origin: process.env.CLIENT_URL ,
-    methods: ["GET","POST","PUT","DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"]
   })
 )
 app.use(express.json()); // Parse JSON bodies
