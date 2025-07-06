@@ -1,6 +1,6 @@
 // frontend/src/components/TransactionForm.js
 import React, { useState } from 'react';
-import { createTransaction } from '../services/api';
+import { createTransaction, createTransactionBatch } from '../services/api';
 
 const TransactionForm = () => {
   const [formData, setFormData] = useState({
@@ -16,7 +16,7 @@ const TransactionForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await createTransaction({
+      await createTransactionBatch({
         ...formData,
         userId: localStorage.getItem('userId') // Dynamic user ID
       });
