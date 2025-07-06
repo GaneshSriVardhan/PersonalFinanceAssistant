@@ -50,3 +50,19 @@ export const getUser = async () => {
   const response = await api.get('/auth/getUser');
   return response.data;
 };
+
+export const createTransactionBatch = async (transactions) => {
+  const token = localStorage.getItem('token');
+  const response = await axios.post(
+    'http://localhost:5000/api/v1/transactions/batch',
+    { transactions },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }
+    }
+  );
+  return response.data;
+};
+

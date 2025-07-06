@@ -89,3 +89,46 @@ exports.getTotals = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
+exports.createTransactionBatch = async (req, res) => {
+  try {
+    const { transactions } = req.body;
+
+    if (!Array.isArray(transactions)) {
+      return res.status(400).json({ message: 'Transactions must be an array' });
+    }
+
+    const userId = req.user.id;
+
+    const validTransactions = transactions.map(t => {
+  // Convert date from DD-MM-YYYY → YYYY-MM-DD
+  let parsedDate = t.date;
+  if (typeof t.date === 'string' && t.date.includes('-')) {
+    const [day, month, year] = t.date.split('-');
+    parsedDate = new Date(`${year}-${month}-${day}`);
+  }
+
+  // Normalize type (case & plural-safe)
+  let type = t.type?.trim().toLowerCase();
+  if (type === 'income' || type === 'incomes') type = 'Income';
+  else if (type === 'expense' || type === 'expenses') type = 'Expense';
+  else type = 'Expense'; // default fallback
+
+  return {
+    type,
+    amount: Number(t.amount),
+    category: t.category,
+    date: parsedDate,
+    description: t.description || '',
+    userId
+  };
+});
+
+    await Transaction.insertMany(validTransactions);
+
+    res.status(201).json({ message: 'Transactions saved', count: validTransactions.length });
+  } catch (err) {
+    console.error('Batch insert error:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
