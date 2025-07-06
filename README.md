@@ -156,7 +156,7 @@ A **MONGODB** database is used. Key schemas:
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/your-username/personal-financial-assistant.git
+   git clone [https://github.com/your-username/personal-financial-assistant.git](https://github.com/GaneshSriVardhan/PersonalFinanceAssistant)
    cd personal-financial-assistant
 2. **Install Backend Dependencies**
 
